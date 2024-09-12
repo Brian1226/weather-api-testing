@@ -35,16 +35,16 @@ def test_get_coordinates(city, state, country, expected_lat, expected_lon, mock_
 
 
 @pytest.mark.parametrize(                                                               # sets of inputs to check for expected weather
-        'lat, lon, expected_weather',
+        'lat, lon, expected_weather, expected_temp',
         [
-            (37.3361663, -121.890591, 'clear sky'),
-            (42.8867166, -78.8783922, 'smoke'),
-            (41.8755616, -87.6244212, 'scattered clouds'),
+            (37.3361663, -121.890591, 'clear sky', 78.57),
+            (42.8867166, -78.8783922, 'smoke', 83.48),
+            (41.8755616, -87.6244212, 'scattered clouds', 81.28),
         ]
 )
 
 
-def test_get_weather_data(lat, lon, expected_weather, mock_get):
+def test_get_weather_data(lat, lon, expected_weather, expected_temp, mock_get):
     mock_get.return_value.status_code = requests.codes.ok
     mock_get.return_value.json.return_value = {
         'weather': [
@@ -52,9 +52,13 @@ def test_get_weather_data(lat, lon, expected_weather, mock_get):
                 'description': expected_weather,
             }
         ],
+        'main': {
+            'temp': expected_temp
+        }
     }
     weather_data = app.get_weather_data(lat, lon)
     assert weather_data["weather"][0]["description"] == expected_weather
+    assert weather_data["main"]["temp"] == expected_temp
 
 
 @pytest.mark.parametrize(                                                               # test different values of city, state, country 
